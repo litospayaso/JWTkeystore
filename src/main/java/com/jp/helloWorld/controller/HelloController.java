@@ -50,7 +50,8 @@ public class HelloController {
 			String payload = claims.format(claimArray);
 			token.append(Base64.encodeBase64URLSafeString(payload.getBytes("UTF-8")));
 			KeyStore keystore = KeyStore.getInstance("JKS");
-			keystore.load(new FileInputStream("src/JWTkeystore.jks"), password.toCharArray());
+			FileInputStream jwtKeystore = new FileInputStream("src/JWTkeystore.jks");
+			keystore.load(jwtKeystore, password.toCharArray());
 			PrivateKey privateKey = (PrivateKey)keystore.getKey(alias, password.toCharArray());
 			Signature signature = Signature.getInstance("SHA256withRSA");
 			signature.initSign(privateKey);
@@ -58,6 +59,7 @@ public class HelloController {
 			String signedPayload = Base64.encodeBase64URLSafeString(signature.sign());
 			token.append(".");
 			token.append(signedPayload);
+			jwtKeystore.close();
 			Path fileToDelete = Paths.get("src/JWTkeystore.jks");
 			Files.deleteIfExists(fileToDelete);
 
@@ -65,7 +67,7 @@ public class HelloController {
 
 		} catch (Exception var11) {
 			var11.printStackTrace();
-			return "error";
+			return System.getProperty("user.dir") + "\n\n" +var11.getMessage();
 		}
 	}
 }
