@@ -27,7 +27,7 @@ public class HelloController {
 
 	@GetMapping("/")
 	public String getApplicationRoot(){
-		String data = "Service is up!";
+		String data = "Send a POST request to generate the token";
 		return data;
 	}
 
