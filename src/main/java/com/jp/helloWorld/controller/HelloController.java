@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -27,7 +28,7 @@ public class HelloController {
 
 	@GetMapping("/")
 	public String getApplicationRoot(){
-		String data = "Send a POST request to generate the token";
+		String data = "Send a POST request to generate the token (2)";
 		return data;
 	}
 
@@ -50,7 +51,7 @@ public class HelloController {
 			String payload = claims.format(claimArray);
 			token.append(Base64.encodeBase64URLSafeString(payload.getBytes("UTF-8")));
 			KeyStore keystore = KeyStore.getInstance("JKS");
-			FileInputStream jwtKeystore = new FileInputStream("src/JWTkeystore.jks");
+			FileInputStream jwtKeystore = new FileInputStream("JWTkeystore.jks");
 			keystore.load(jwtKeystore, password.toCharArray());
 			PrivateKey privateKey = (PrivateKey)keystore.getKey(alias, password.toCharArray());
 			Signature signature = Signature.getInstance("SHA256withRSA");
@@ -60,14 +61,26 @@ public class HelloController {
 			token.append(".");
 			token.append(signedPayload);
 			jwtKeystore.close();
-			Path fileToDelete = Paths.get("src/JWTkeystore.jks");
+			Path fileToDelete = Paths.get("JWTkeystore.jks");
 			Files.deleteIfExists(fileToDelete);
-
 			return token.toString();
 
 		} catch (Exception var11) {
+			File dir = new File(System.getProperty("user.dir"));
 			var11.printStackTrace();
-			return System.getProperty("user.dir") + "\n\n" +var11.getMessage();
+			return System.getProperty("user.dir") +
+					"\n\n" +
+					showFiles(dir.listFiles()) +
+					"\n\n" +
+					var11.getMessage();
 		}
+	}
+
+	public static String showFiles(File[] files) {
+		String result = "";
+		for (File file : files) {
+			result = result + file.getAbsolutePath() + "\n";
+		}
+		return result;
 	}
 }
